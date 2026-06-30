@@ -8,6 +8,7 @@ import gzip
 import json
 import csv
 import ast
+import tempfile
 
 st.set_page_config(
     page_title="Lobber — Intelligent Resume Ranker",
@@ -78,7 +79,7 @@ data_source = st.radio(
 
 def process_and_convert_to_jsonl(input_path, original_name):
     """Converts various file formats to a singular accessible JSONL type."""
-    output_path = "uploaded_candidates.jsonl"
+    output_path = os.path.join(tempfile.gettempdir(), "uploaded_candidates.jsonl")
     name_lower = original_name.lower()
     
     # Handle gz compression
@@ -131,7 +132,8 @@ if data_source == "Upload custom dataset":
         label_visibility="visible",
     )
     if uploaded_file is not None:
-        temp_path = f"temp_{uploaded_file.name}"
+        temp_dir = tempfile.gettempdir()
+        temp_path = os.path.join(temp_dir, f"temp_{uploaded_file.name}")
         with open(temp_path, "wb") as f:
             f.write(uploaded_file.getbuffer())
             
@@ -143,7 +145,7 @@ if data_source == "Upload custom dataset":
                     st.error("No valid file (.jsonl, .json, .csv, .tsv) found inside the zip folder.")
                     st.stop()
                 
-                extracted_path = f"temp_extracted_{valid_files[0]}"
+                extracted_path = os.path.join(temp_dir, f"temp_extracted_{valid_files[0]}")
                 with z.open(valid_files[0]) as zf, open(extracted_path, "wb") as f:
                     f.write(zf.read())
                 candidate_file_path = process_and_convert_to_jsonl(extracted_path, valid_files[0])

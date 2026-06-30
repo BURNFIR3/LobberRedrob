@@ -620,6 +620,12 @@ def main():
     embeddings = embeddings[:n]
     candidates = candidates[:n]
 
+    if n == 0:
+        log.warning("No candidates found. Writing empty submission files.")
+        pd.DataFrame(columns=["rank", "candidate_id", "score", "reasoning"]).to_csv("submission.csv", index=False)
+        pd.DataFrame(columns=["rank", "candidate_id", "matched_skill_count", "github_activity_score", "recruiter_response_rate"]).to_csv("signals.csv", index=False)
+        return
+
     log.info("Embedding JD text...")
     model = SentenceTransformer('all-MiniLM-L6-v2')
     jd_emb = model.encode([JD_TEXT], convert_to_numpy=True)
