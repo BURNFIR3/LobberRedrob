@@ -75,8 +75,8 @@ data_source = st.radio(
 
 if data_source == "Upload custom dataset":
     uploaded_file = st.file_uploader(
-        "Drag and drop a custom candidate file (.jsonl, .json, .gz, or .zip) here",
-        type=["jsonl", "json", "gz", "zip"],
+        "Drag and drop a custom candidate file (.jsonl, .json, .csv, .tsv, .gz, or .zip) here",
+        type=["jsonl", "json", "csv", "tsv", "gz", "zip"],
         label_visibility="visible",
     )
     if uploaded_file is not None:
@@ -85,16 +85,26 @@ if data_source == "Upload custom dataset":
             with open(candidate_file_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
         elif uploaded_file.name.endswith('.zip'):
-            candidate_file_path = "uploaded_candidates.jsonl"
-            with zipfile.ZipFile(uploaded_file, "r") as z:
-                valid_files = [name for name in z.namelist() if name.endswith('.jsonl') or name.endswith('.json')]
+            candidate_file_path = "uploaded_candidates.zip"
+            with open(candidate_file_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            
+            # Extract valid files from the zip
+            extracted_path = None
+            with zipfile.ZipFile(candidate_file_path, "r") as z:
+                valid_exts = ('.jsonl', '.json', '.csv', '.tsv')
+                valid_files = [name for name in z.namelist() if any(name.endswith(ext) for ext in valid_exts)]
                 if not valid_files:
-                    st.error("No .jsonl or .json file found inside the zip folder.")
+                    st.error("No valid file (.jsonl, .json, .csv, .tsv) found inside the zip folder.")
                     st.stop()
+                
+                # We extract the first valid file and use it as the candidate file
+                candidate_file_path = f"uploaded_{valid_files[0]}"
                 with z.open(valid_files[0]) as zf, open(candidate_file_path, "wb") as f:
                     f.write(zf.read())
         else:
-            candidate_file_path = "uploaded_candidates.jsonl"
+            # Handle .csv, .tsv, .json, .jsonl directly
+            candidate_file_path = f"uploaded_{uploaded_file.name}"
             with open(candidate_file_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
                 

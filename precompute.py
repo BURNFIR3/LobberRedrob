@@ -41,6 +41,7 @@ from collections import defaultdict
 from datetime import date, timedelta
 from pathlib import Path
 import gzip
+import csv
 
 import numpy as np
 
@@ -229,10 +230,34 @@ def stream_candidates(path: Path):
         f = open(path, "r", encoding="utf-8-sig")
         
     with f:
-        for line in f:
-            line = line.strip()
-            if line:
-                yield json.loads(line)
+        # Check if the file is CSV or TSV
+        name_lower = path.name.lower()
+        if ".csv" in name_lower or ".tsv" in name_lower:
+            sep = "\t" if ".tsv" in name_lower else ","
+            reader = csv.DictReader(f, delimiter=sep)
+            for row in reader:
+                parsed_row = {}
+                for k, v in row.items():
+                    if v and (v.startswith("{") or v.startswith("[")):
+                        try:
+                            # Safely evaluate JSON-like string columns
+                            import ast
+                            # Using ast.literal_eval first handles single-quoted python dicts,
+                            # fallback to json.loads for standard JSON.
+                            try:
+                                parsed_row[k] = ast.literal_eval(v)
+                            except (SyntaxError, ValueError):
+                                parsed_row[k] = json.loads(v)
+                        except:
+                            parsed_row[k] = v
+                    else:
+                        parsed_row[k] = v
+                yield parsed_row
+        else:
+            for line in f:
+                line = line.strip()
+                if line:
+                    yield json.loads(line)
 
 
 def main():
