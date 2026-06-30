@@ -27,10 +27,10 @@ team_members:
 # ============================================================================
 github_repo: "https://github.com/BURNFIR3/LobberRedrob"
 
-sandbox_link: "https://huggingface.co/spaces/YOUR_USERNAME/redrob-ranker"
+sandbox_link: "https://huggingface.co/spaces/Burnfir3/LobberRedrob"
 
 
-reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submission.csv"
+reproduce_command: "python precompute.py --candidates ./candidates.jsonl && python rank.py"
 
 # ============================================================================
 # Compute environment
