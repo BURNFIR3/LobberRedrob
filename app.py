@@ -3,6 +3,8 @@ import subprocess
 import os
 import pandas as pd
 import numpy as np
+import zipfile
+import gzip
 
 st.set_page_config(
     page_title="Lobber — Intelligent Resume Ranker",
@@ -73,18 +75,29 @@ data_source = st.radio(
 
 if data_source == "Upload custom dataset":
     uploaded_file = st.file_uploader(
-        "Drag and drop a custom candidate file (.jsonl, .json, or .gz) here",
-        type=["jsonl", "json", "gz"],
+        "Drag and drop a custom candidate file (.jsonl, .json, .gz, or .zip) here",
+        type=["jsonl", "json", "gz", "zip"],
         label_visibility="visible",
     )
     if uploaded_file is not None:
         if uploaded_file.name.endswith('.gz'):
             candidate_file_path = "uploaded_candidates.jsonl.gz"
+            with open(candidate_file_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+        elif uploaded_file.name.endswith('.zip'):
+            candidate_file_path = "uploaded_candidates.jsonl"
+            with zipfile.ZipFile(uploaded_file, "r") as z:
+                valid_files = [name for name in z.namelist() if name.endswith('.jsonl') or name.endswith('.json')]
+                if not valid_files:
+                    st.error("No .jsonl or .json file found inside the zip folder.")
+                    st.stop()
+                with z.open(valid_files[0]) as zf, open(candidate_file_path, "wb") as f:
+                    f.write(zf.read())
         else:
             candidate_file_path = "uploaded_candidates.jsonl"
-            
-        with open(candidate_file_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
+            with open(candidate_file_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+                
         st.caption(f"Source: `{uploaded_file.name}` ({uploaded_file.size:,} bytes)")
     else:
         st.info("Please upload a `.jsonl`, `.json`, or `.gz` file to proceed.")
@@ -176,11 +189,25 @@ if run_clicked:
 
     # ── Download ──────────────────────────────────────────────────────────────
     csv_bytes = df.to_csv(index=False).encode("utf-8")
-    st.download_button(
-        label="Download submission.csv",
-        data=csv_bytes,
-        file_name="submission.csv",
-        mime="text/csv",
-        type="primary",
-        use_container_width=True,
-    )
+    gz_bytes = gzip.compress(csv_bytes)
+    
+    col_dl1, col_dl2 = st.columns(2)
+    
+    with col_dl1:
+        st.download_button(
+            label="Download submission.csv",
+            data=csv_bytes,
+            file_name="submission.csv",
+            mime="text/csv",
+            type="primary",
+            use_container_width=True,
+        )
+        
+    with col_dl2:
+        st.download_button(
+            label="Download submission.csv.gz (Compressed)",
+            data=gz_bytes,
+            file_name="submission.csv.gz",
+            mime="application/gzip",
+            use_container_width=True,
+        )
