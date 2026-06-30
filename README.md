@@ -1,15 +1,3 @@
----
-title: Redrob AI Ranker
-emoji: 🎯
-colorFrom: blue
-colorTo: indigo
-sdk: streamlit
-sdk_version: 1.32.0
-python_version: "3.11"
-app_file: app.py
-pinned: false
----
-
 # Lobber — Intelligent Resume Ranker
 
 A multi-stage, fully explainable AI ranking pipeline built for the Redrob Hackathon. Given a pool of candidate profiles in JSONL format, the system outputs a ranked list of the top 100 candidates best suited for a senior NLP/IR engineering role. Each candidate in the output receives a natural-language reasoning string that cites specific facts — employer, tenure, named skills, and signal values — directly from their profile.
