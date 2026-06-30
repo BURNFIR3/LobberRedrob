@@ -64,21 +64,31 @@ st.markdown('<p class="section-label">Input</p>', unsafe_allow_html=True)
 
 SAMPLE_PATH = "sample_data.jsonl"
 
-uploaded_file = st.file_uploader(
-    "Upload a custom candidate file (.jsonl / .json / .gz) or leave empty to use the 100-candidate sample.",
-    type=["jsonl", "json", "gz"],
-    label_visibility="visible",
+data_source = st.radio(
+    "Choose data source:",
+    ["Use pre-loaded sample (100 candidates)", "Upload custom dataset"],
+    horizontal=True,
+    label_visibility="collapsed"
 )
 
-if uploaded_file is not None:
-    if uploaded_file.name.endswith('.gz'):
-        candidate_file_path = "uploaded_candidates.jsonl.gz"
+if data_source == "Upload custom dataset":
+    uploaded_file = st.file_uploader(
+        "Drag and drop a custom candidate file (.jsonl, .json, or .gz) here",
+        type=["jsonl", "json", "gz"],
+        label_visibility="visible",
+    )
+    if uploaded_file is not None:
+        if uploaded_file.name.endswith('.gz'):
+            candidate_file_path = "uploaded_candidates.jsonl.gz"
+        else:
+            candidate_file_path = "uploaded_candidates.jsonl"
+            
+        with open(candidate_file_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        st.caption(f"Source: `{uploaded_file.name}` ({uploaded_file.size:,} bytes)")
     else:
-        candidate_file_path = "uploaded_candidates.jsonl"
-        
-    with open(candidate_file_path, "wb") as f:
-        f.write(uploaded_file.getbuffer())
-    st.caption(f"Source: `{uploaded_file.name}` ({uploaded_file.size:,} bytes)")
+        st.info("Please upload a `.jsonl`, `.json`, or `.gz` file to proceed.")
+        st.stop()
 else:
     candidate_file_path = SAMPLE_PATH
     st.caption(f"Source: `{SAMPLE_PATH}` — 100 candidates from the competition dataset")
