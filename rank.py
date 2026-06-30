@@ -645,6 +645,7 @@ def main():
     for rank, (c_obj, score, comp) in enumerate(top_100[:10], start=1):
         log.info(f"  Rank {rank:3d} | {c_obj['candidate_id']} | score={score:.4f} | {comp}")
 
+    # Write submission.csv
     out_path = Path("submission.csv")
     log.info(f"Writing top 100 to {out_path}...")
     with open(out_path, "w", newline="", encoding="utf-8") as f:
@@ -657,7 +658,31 @@ def main():
             reason = generate_reasoning(c_obj, comp, matched_skills, top_tier_names, rank, has_rag)
             writer.writerow([c_obj["candidate_id"], rank, round(score, 5), reason])
 
+    # Write signals.csv — raw per-candidate signal values for visualisation
+    sig_path = Path("signals.csv")
+    with open(sig_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["rank", "candidate_id", "score",
+                         "matched_skill_count", "github_activity_score", "recruiter_response_rate",
+                         "semantic", "kw_hits", "avg_tenure"])
+        for rank, (c_obj, score, comp) in enumerate(top_100, start=1):
+            r = c_obj.get("redrob_signals", {}) or {}
+            github_raw = float(r.get("github_activity_score") or -1)
+            recruiter_raw = float(r.get("recruiter_response_rate") or -1)
+            writer.writerow([
+                rank,
+                c_obj["candidate_id"],
+                round(score, 5),
+                comp.get("matched_skill_count", 0),
+                round(github_raw, 2),
+                round(recruiter_raw, 3),
+                round(comp.get("semantic", 0), 4),
+                comp.get("kw_hits", 0),
+                comp.get("avg_tenure", 0),
+            ])
+
     log.info("Done!")
+
 
 if __name__ == "__main__":
     main()
