@@ -29,6 +29,13 @@ github_repo: "https://github.com/BURNFIR3/LobberRedrob"
 
 sandbox_link: "https://huggingface.co/spaces/Burnfir3/LobberRedrob"
 
+If you have access to the competition dataset, place it as follows:
+
+```
+LobberRedrob/
+└── Main/
+    └── candidates.jsonl      ← place the file here
+```
 
 reproduce_command: "python precompute.py --candidates .\\Main\\candidates.jsonl ; python rank.py"
 
@@ -73,8 +80,8 @@ methodology_summary: |
 # Declarations
 # ============================================================================
 declarations:
-  read_submission_spec: true        # I have read submission_spec.md in full
-  code_is_original_work: true       # My code is my team's original work (using AI as a tool is fine)
-  no_collusion: true                # I have not coordinated my submission with other teams
-  honeypot_check_done: false        # OPTIONAL — set true if you explicitly checked for honeypots in your ranking
-  reproduction_tested: true         # I have tested that my reproduce_command runs end-to-end
+  read_submission_spec: true        
+  code_is_original_work: true      
+  no_collusion: true                
+  honeypot_check_done: false        
+  reproduction_tested: true         # But first enter the candidates data in  a new main folder under LobberRedrob/
