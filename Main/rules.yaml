@@ -1,0 +1,82 @@
+stage1:
+  shortlist_size: 2000
+  semantic_retrieval_k: 12000
+  use_bm25: true
+  use_semantic: true
+
+  weights:
+    semantic_score: 0.72
+    bm25_score: 0.10
+    availability_score: 0.08
+    location_fit: 0.04
+    seniority_fit: 0.03
+    production_fit: 0.03
+
+  hard_filters:
+    min_years_experience: 4
+    max_notice_days: 60
+    require_in_india_or_relocate: true
+    require_recent_activity_days: 180
+    reject_if_open_to_work_false_and_last_active_gt_days: 365
+    reject_honeypot_flag: true
+
+  soft_penalties:
+    notice_days:
+      thresholds: [30, 60, 90, 120]
+      penalties: [0.00, 0.03, 0.06, 0.10]
+    recruiter_response_rate:
+      thresholds: [0.8, 0.6, 0.4, 0.2]
+      penalties: [0.00, 0.02, 0.05, 0.09]
+    avg_response_time_hours:
+      thresholds: [24, 72, 168]
+      penalties: [0.00, 0.02, 0.05]
+    last_active_days:
+      thresholds: [30, 90, 180, 365]
+      penalties: [0.00, 0.02, 0.05, 0.10]
+    github_activity_score:
+      missing_penalty: 0.01
+      low_score_threshold: 10
+      low_score_penalty: 0.02
+
+  soft_boosts:
+    open_to_work_flag: 0.05
+    verified_email: 0.01
+    verified_phone: 0.01
+    linkedin_connected: 0.01
+    willing_to_relocate: 0.02
+    recent_activity_days: 30
+    recent_activity_boost: 0.03
+
+  jd_signals:
+    must_have_keywords:
+      - python
+      - embeddings
+      - retrieval
+      - ranking
+      - vector
+      - faiss
+      - bm25
+      - evaluation
+      - ndcg
+      - map
+      - mrr
+    preferred_keywords:
+      - lora
+      - qlora
+      - peft
+      - ab testing
+      - recommender
+      - search
+      - hybrid
+      - production
+      - deployed
+      - ship
+      - offline evaluation
+      - online evaluation
+    disqualifying_keywords:
+      - marketing
+      - hr
+      - recruiter
+      - sales
+      - operations manager
+      - pure research

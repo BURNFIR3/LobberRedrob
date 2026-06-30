@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Precomputed artifacts (large numpy/json blobs — regenerate with precompute.py)
+artifacts/embeddings.npy
+artifacts/id_index.json
+artifacts/stage1_shortlist.jsonl
+
+# Raw candidate data — too large for GitHub (464 MB)
+Main/candidates.jsonl
+
+# Large data files
+sample_candidates.json
+
+# Editor / OS
+.vscode/
+desktop.ini
+.DS_Store
+Thumbs.db
