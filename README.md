@@ -10,7 +10,7 @@ app_file: app.py
 pinned: false
 ---
 
-# Redrob Ranker Sandbox 🎯
+# Lobber, Intelligent Resume Ranker Sandbox
 
 This is a Hugging Face Space running a Streamlit dashboard that validates the end-to-end execution of our Redrob AI candidate ranking pipeline.
 
