@@ -154,7 +154,7 @@ if data_source == "Upload custom dataset":
                 
         st.caption(f"Source: `{uploaded_file.name}` converted to singular accessible JSONL format.")
     else:
-        st.info("Please upload a `.jsonl`, `.json`, or `.gz` file to proceed.")
+        st.info("Please upload a `.jsonl`, `.json`, `.csv`, `.tsv`, `.gz`, or `.zip` file to proceed.")
         st.stop()
 else:
     candidate_file_path = SAMPLE_PATH
