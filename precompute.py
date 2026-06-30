@@ -222,7 +222,7 @@ def filter_has_any_jd_keyword(c: dict, full_text: str) -> tuple[bool, str | None
 
 def stream_candidates(path: Path):
     """Stream candidates.jsonl one line at a time."""
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, "r", encoding="utf-8-sig") as f:
         for line in f:
             line = line.strip()
             if line:
