@@ -1,35 +1,14 @@
 """
-filter.py — Stage 1: Apply hard filters one-by-one to 100k candidates.
+precompute.py — Stage 1: Apply hard filters to candidates.
 
-Philosophy:
-  - We DO NOT use semantic/FAISS pre-filtering here. We read ALL 100k candidates.
-  - Each hard filter is applied sequentially, with a running count of rejections.
-  - Candidates that survive ALL hard filters pass to the shortlist.
-  - This gives full visibility into exactly how many candidates fail each rule.
+Applies sequentially:
+1. Honeypot detection
+2. Location filter
+3. Inactivity filter
+4. JD-relevant role presence
+5. Must-have skill/text check
 
-Hard filters applied (in order):
-  1. Honeypot detection
-       Pattern 1 — many expert skills with 0 duration
-       Pattern 2 — large unrecorded career gap (≥10% of claimed YoE unaccounted)
-       Pattern 3 — skill months >> career months (4× multiplier)
-  2. Location: India or willing to relocate
-  3. Inactivity + not open to work (>365 days inactive)
-  4. No JD-relevant role presence — zero relevant domain keywords in
-       current title, ALL past career titles, headline, summary, or descriptions
-  5. Must-have skill/text check (zero retrieval/NLP keywords anywhere in profile)
-
-NOT enforced here (deferred to scoring):
-  - Minimum years of experience (soft ranking signal, not a hard gate)
-  - Notice period
-  - Preferred cities
-  - Consulting company history
-  - Soft disqualifiers (LangChain-only, CV-only, etc.)
-
-Output:
-  artifacts/stage1_shortlist.jsonl   — candidates surviving all hard filters
-
-Usage:
-    python filter.py --candidates Main/candidates.jsonl [--out artifacts/stage1_shortlist.jsonl]
+Candidates surviving filters are saved to the shortlist.
 """
 from __future__ import annotations
 
@@ -63,9 +42,7 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-# ──────────────────────────────────────────────────────────────
 # Utility helpers
-# ──────────────────────────────────────────────────────────────
 
 def days_since(date_str: str | None) -> int:
     """Days since a date string (YYYY-MM-DD). Returns 9999 if missing."""

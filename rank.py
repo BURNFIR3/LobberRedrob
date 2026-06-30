@@ -32,7 +32,7 @@ Preferred: fine-tuning (LoRA, QLoRA, PEFT), XGBoost/LightGBM for ranking, MLOps,
 Location: India (Pune/Noida preferred). Ideal YoE: 5–9 years.
 """
 
-# Skills we want to call out in reasoning when found
+# Key skills for JD matching
 JD_CORE_SKILLS = [
     "faiss", "pinecone", "qdrant", "milvus", "weaviate", "opensearch", "elasticsearch",
     "sentence-transformers", "sentence transformers", "bert", "transformers",
@@ -48,13 +48,12 @@ JD_CORE_SKILLS = [
 ]
 JD_CORE_SKILLS.sort(key=len, reverse=True)
 
-# Top-tier companies that are a strong positive quality signal
+# Top-tier companies
 TOP_TIER_COMPANIES = {
     "google", "meta", "apple", "amazon", "microsoft", "netflix", "openai",
     "deepmind", "anthropic", "linkedin", "uber", "stripe", "databricks",
     "hugging face", "cohere", "nvidia"
 }
-# How much bonus per top-tier company role (capped at 2 roles)
 TOP_TIER_BONUS_PER_ROLE = 0.015
 
 
@@ -69,7 +68,6 @@ def compute_cosine_similarities(query_emb, doc_embs):
 
 
 def get_matching_skills(c: dict) -> list[str]:
-    """Return skill names that directly match JD core skills."""
     skills = c.get("skills") or []
     full_text = " ".join((sk.get("name") or "") for sk in skills).lower()
     matched = []
@@ -85,7 +83,6 @@ def get_matching_skills(c: dict) -> list[str]:
 
 
 def check_junior_yoe_mismatch(c: dict) -> tuple[bool, float]:
-    """Returns (is_mismatch, penalty). A 'Junior' title with 5+ YoE is suspicious."""
     p = c.get("profile", {}) or {}
     title = (p.get("current_title") or "").lower()
     yoe = float(p.get("years_of_experience") or 0)

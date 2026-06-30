@@ -56,7 +56,7 @@ st.markdown("""
 
 os.makedirs("artifacts", exist_ok=True)
 
-# ── Header ─────────────────────────────────────────────────────────────────────
+# Header
 st.title("Lobber — Intelligent Resume Ranker")
 st.markdown(
     "<h2>Multi-stage ranking pipeline: hard filters → semantic embeddings → composite scoring</h2>",
@@ -65,7 +65,7 @@ st.markdown(
 
 st.divider()
 
-# ── Input ──────────────────────────────────────────────────────────────────────
+# Input
 st.markdown('<p class="section-label">Input</p>', unsafe_allow_html=True)
 
 SAMPLE_PATH = "sample_data.jsonl"
@@ -198,7 +198,7 @@ if st.session_state.pipeline_run_complete:
 
     st.divider()
 
-    # ── Summary metrics ──────────────────────────────────────────────────────
+    # Summary metrics
     st.markdown('<p class="section-label">Summary</p>', unsafe_allow_html=True)
     m1, m2, m3 = st.columns(3)
     m1.metric("Candidates Ranked", len(df))
@@ -207,7 +207,7 @@ if st.session_state.pipeline_run_complete:
 
     st.divider()
 
-    # ── Signal charts (3 specific) ────────────────────────────────────────────
+    # Signal charts
     if sig_df is not None:
         st.markdown('<p class="section-label">Signal Breakdown by Rank</p>', unsafe_allow_html=True)
         c1, c2, c3 = st.columns(3)
@@ -234,7 +234,7 @@ if st.session_state.pipeline_run_complete:
 
         st.divider()
 
-    # ── Ranked table + inline reasoning ──────────────────────────────────────
+    # Ranked table + inline reasoning
     st.markdown('<p class="section-label">Selected Candidates with Ranks and Reasoning</p>', unsafe_allow_html=True)
 
     for _, row in df.iterrows():
@@ -249,7 +249,7 @@ if st.session_state.pipeline_run_complete:
 
     st.divider()
 
-    # ── Download ──────────────────────────────────────────────────────────────
+    # Download
     csv_bytes = df.to_csv(index=False).encode("utf-8")
     gz_bytes = gzip.compress(csv_bytes)
     
