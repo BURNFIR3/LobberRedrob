@@ -30,21 +30,21 @@ github_repo: "https://github.com/BURNFIR3/LobberRedrob"
 sandbox_link: "https://huggingface.co/spaces/Burnfir3/LobberRedrob"
 
 
-reproduce_command: "python precompute.py --candidates ./candidates.jsonl && python rank.py"
+reproduce_command: "python precompute.py --candidates .\\Main\\candidates.jsonl ; python rank.py"
 
 # ============================================================================
 # Compute environment
 # ============================================================================
 compute:
-  platform: "MacBook Pro M2"                    # Or: "AWS EC2 c5.4xlarge", "Local Linux box", etc.
-  cpu_cores: 8                                  # Number of CPU cores used
-  ram_gb: 16                                    # Available RAM in GB
-  python_version: "3.11.4"                      # python --version
-  os: "macOS 14.2"                              # Or "Ubuntu 22.04 LTS", etc.
-  uses_gpu_for_inference: false                 # Must be false — see compute constraints
-  has_network_during_ranking: false             # Must be false — no API calls during ranking
-  pre_computation_required: false               # true if you pre-compute embeddings or train models offline
-  pre_computation_time_minutes: 0               # Approximate, if applicable
+  platform: "Windows 11 PC"
+  cpu_cores: 16
+  ram_gb: 16
+  python_version: "3.11.9"
+  os: "Windows-10-10.0.26200-SP0"
+  uses_gpu_for_inference: false
+  has_network_during_ranking: false
+  pre_computation_required: true
+  pre_computation_time_minutes: 5
 
 # ============================================================================
 # AI tools declaration
@@ -65,15 +65,9 @@ ai_usage_summary: |
 # Approach summary (optional but recommended)
 # ============================================================================
 methodology_summary: |
-  ≤200 word summary of your approach. Strongly recommended.
-
-  Example:
-  "Rule-based ranker with explicit reasoning capture. Five scoring components
-  (skills, title+career, experience years, location, education) combined with
-  a multiplicative behavioral-signal modifier. The title component is the
-  decisive signal against keyword-stuffer traps; an endorsement-and-duration
-  trust multiplier on skills catches lazy keyword stuffing. Runtime is ~10
-  seconds for 50K candidates on CPU."
+  Our approach uses a robust two-stage pipeline. Stage 1 (precompute.py) applies strict rule-based hard filters across all candidates to immediately disqualify fabricated honeypot profiles, out-of-scope locations, inactive profiles, and those entirely lacking relevant AI/ML domain keywords in their history. This rapidly reduces the search space without heavy computation. 
+  
+  Stage 2 (rank.py) generates lightweight semantic embeddings using all-MiniLM-L6-v2 on the surviving shortlist to score candidates against the JD. The baseline semantic score is then adjusted using heuristic modifiers—awarding bonuses for top-tier company experience (e.g., Google, Meta) and high GitHub/recruiter engagement, while penalizing consulting-only backgrounds, mismatched seniority, and prolonged notice periods. This hybrid methodology ensures highly explainable, transparent ranking while maintaining rapid execution times (~5 minutes total on CPU).
 
 # ============================================================================
 # Declarations

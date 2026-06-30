@@ -619,8 +619,10 @@ def main():
 
     if n == 0:
         log.warning("No candidates found. Writing empty submission files.")
-        pd.DataFrame(columns=["rank", "candidate_id", "score", "reasoning"]).to_csv("submission.csv", index=False)
-        pd.DataFrame(columns=["rank", "candidate_id", "matched_skill_count", "github_activity_score", "recruiter_response_rate"]).to_csv("signals.csv", index=False)
+        with open("submission.csv", "w", newline="", encoding="utf-8") as f:
+            csv.writer(f).writerow(["rank", "candidate_id", "score", "reasoning"])
+        with open("signals.csv", "w", newline="", encoding="utf-8") as f:
+            csv.writer(f).writerow(["rank", "candidate_id", "matched_skill_count", "github_activity_score", "recruiter_response_rate"])
         return
 
     log.info("Embedding JD text...")
