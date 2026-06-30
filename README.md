@@ -107,6 +107,7 @@ The remainder of the string selects from a template bank based on which scoring 
 ├── submission.csv              # Latest ranked output (top 100)
 ├── submission_metadata.yaml    # Submission metadata for the Redrob portal
 ├── Main/
+│   ├── candidates.jsonl        # NOT included — competition dataset (place here manually)
 │   └── rules.yaml
 ├── artifacts/                  # Runtime-generated; not committed
 │   ├── embeddings.npy
@@ -128,25 +129,47 @@ The remainder of the string selects from a template bank based on which scoring 
 
 ### Install
 
-```bash
+```powershell
 pip install -r requirements.txt
 ```
 
-### Run end-to-end
+### Data Setup
 
-```bash
-# Stage 1: apply hard filters and generate embeddings
-python precompute.py --candidates ./Main/candidates.jsonl
+> **The `candidates.jsonl` dataset is not included in this repository** — it is the proprietary competition dataset provided by Redrob to registered participants only.
 
-# Stage 2: score, rank, and write submission.csv
+If you have access to the competition dataset, place it as follows:
+
+```
+LobberRedrob/
+└── Main/
+    └── candidates.jsonl      ← place the file here
+```
+
+If you want to run a quick test with the bundled 100-candidate sample instead (no download needed), skip the above and use `sample_data.jsonl` in the run command:
+
+```powershell
+# Quick test with the included 100-candidate sample
+python precompute.py --candidates ./sample_data.jsonl
 python rank.py
 ```
 
-The full 100k run completes in approximately 3–4 minutes on a CPU (8 cores, 16 GB RAM). The 100-candidate extract completes in under 30 seconds.
+### Run end-to-end (full competition dataset)
+
+Once `Main/candidates.jsonl` is in place:
+
+```powershell
+# Stage 1: apply hard filters and generate embeddings (~4-5 min on CPU)
+python precompute.py --candidates ./Main/candidates.jsonl
+
+# Stage 2: score, rank, and write submission.csv (~35 seconds)
+python rank.py
+```
+
+The full 100k run completes in approximately **5–6 minutes** on a CPU (16 cores, 16 GB RAM).
 
 ### Validate output
 
-```bash
+```powershell
 python validate_submission.py submission.csv
 ```
 
@@ -154,8 +177,9 @@ python validate_submission.py submission.csv
 
 ## Reproduce Command
 
-```bash
-python precompute.py --candidates ./candidates.jsonl && python rank.py
+```powershell
+# PowerShell
+python precompute.py --candidates .\Main\candidates.jsonl ; python rank.py
 ```
 
 Output is written to `submission.csv` in the working directory.
