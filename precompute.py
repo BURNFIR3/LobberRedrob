@@ -40,6 +40,7 @@ import sys
 from collections import defaultdict
 from datetime import date, timedelta
 from pathlib import Path
+import gzip
 
 import numpy as np
 
@@ -222,7 +223,12 @@ def filter_has_any_jd_keyword(c: dict, full_text: str) -> tuple[bool, str | None
 
 def stream_candidates(path: Path):
     """Stream candidates.jsonl one line at a time."""
-    with open(path, "r", encoding="utf-8-sig") as f:
+    if path.suffix.lower() == ".gz":
+        f = gzip.open(path, "rt", encoding="utf-8-sig")
+    else:
+        f = open(path, "r", encoding="utf-8-sig")
+        
+    with f:
         for line in f:
             line = line.strip()
             if line:

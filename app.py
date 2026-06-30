@@ -17,10 +17,16 @@ st.markdown("""
     h2 { font-size: 1.2rem; font-weight: 600; color: #555; margin-top: 0; }
     .stButton > button { font-weight: 600; }
     div[data-testid="stMetric"] {
-        background: #f7f9fc;
-        border: 1px solid #e0e4ea;
+        background: #1E293B;
+        border: 1px solid #334155;
         border-radius: 8px;
         padding: 0.8rem 1rem;
+    }
+    div[data-testid="stMetric"] label {
+        color: #94A3B8 !important;
+    }
+    div[data-testid="stMetric"] div {
+        color: #FFFFFF !important;
     }
     .section-label {
         font-size: 0.75rem;
@@ -68,8 +74,8 @@ with col_check:
 
 with col_upload:
     uploaded_file = st.file_uploader(
-        "Upload a custom candidate file (.jsonl / .json)",
-        type=["jsonl", "json"],
+        "Upload a custom candidate file (.jsonl / .json / .gz)",
+        type=["jsonl", "json", "gz"],
         disabled=use_sample,
         label_visibility="visible",
     )
@@ -79,7 +85,11 @@ if use_sample:
     st.caption(f"Source: `{SAMPLE_PATH}` — 100 candidates from the competition dataset")
 else:
     if uploaded_file is not None:
-        candidate_file_path = "uploaded_candidates.jsonl"
+        if uploaded_file.name.endswith('.gz'):
+            candidate_file_path = "uploaded_candidates.jsonl.gz"
+        else:
+            candidate_file_path = "uploaded_candidates.jsonl"
+            
         with open(candidate_file_path, "wb") as f:
             f.write(uploaded_file.getbuffer())
         st.caption(f"Source: `{uploaded_file.name}` ({uploaded_file.size:,} bytes)")
@@ -119,11 +129,10 @@ if run_clicked:
 
     # ── Summary metrics ──────────────────────────────────────────────────────
     st.markdown('<p class="section-label">Summary</p>', unsafe_allow_html=True)
-    m1, m2, m3, m4 = st.columns(4)
+    m1, m2, m3 = st.columns(3)
     m1.metric("Candidates Ranked", len(df))
     m2.metric("Top Score", f"{df['score'].max():.4f}")
     m3.metric("Median Score", f"{df['score'].median():.4f}")
-    m4.metric("Score Spread", f"{df['score'].max() - df['score'].min():.4f}")
 
     st.divider()
 
@@ -155,7 +164,7 @@ if run_clicked:
         st.divider()
 
     # ── Ranked table + inline reasoning ──────────────────────────────────────
-    st.markdown('<p class="section-label">Ranked Candidates with Reasoning</p>', unsafe_allow_html=True)
+    st.markdown('<p class="section-label">Selected Candidates with Ranks and Reasoning</p>', unsafe_allow_html=True)
 
     for _, row in df.iterrows():
         with st.expander(
