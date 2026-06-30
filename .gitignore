@@ -25,3 +25,6 @@ sample_candidates.json
 desktop.ini
 .DS_Store
 Thumbs.db
+
+# Problem statements and materials
+problem_statements/
