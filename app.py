@@ -5,6 +5,9 @@ import pandas as pd
 import numpy as np
 import zipfile
 import gzip
+import json
+import csv
+import ast
 
 st.set_page_config(
     page_title="Lobber — Intelligent Resume Ranker",
@@ -68,10 +71,58 @@ SAMPLE_PATH = "sample_data.jsonl"
 
 data_source = st.radio(
     "Choose data source:",
-    ["Use pre-loaded sample (100 candidates)", "Upload custom dataset"],
+    ["Use pre-loaded sample (first 100 candidates)", "Upload custom dataset"],
     horizontal=True,
     label_visibility="collapsed"
 )
+
+def process_and_convert_to_jsonl(input_path, original_name):
+    """Converts various file formats to a singular accessible JSONL type."""
+    output_path = "uploaded_candidates.jsonl"
+    name_lower = original_name.lower()
+    
+    # Handle gz compression
+    if name_lower.endswith('.gz'):
+        f = gzip.open(input_path, "rt", encoding="utf-8-sig")
+        name_lower = name_lower[:-3] # remove .gz to check underlying extension
+    else:
+        f = open(input_path, "r", encoding="utf-8-sig")
+        
+    with f, open(output_path, "w", encoding="utf-8") as out_f:
+        if ".csv" in name_lower or ".tsv" in name_lower:
+            sep = "\t" if ".tsv" in name_lower else ","
+            reader = csv.DictReader(f, delimiter=sep)
+            for row in reader:
+                parsed_row = {}
+                for k, v in row.items():
+                    if isinstance(v, str) and (v.startswith("{") or v.startswith("[")):
+                        try:
+                            parsed_row[k] = ast.literal_eval(v)
+                        except (SyntaxError, ValueError):
+                            try:
+                                parsed_row[k] = json.loads(v)
+                            except:
+                                parsed_row[k] = v
+                    else:
+                        parsed_row[k] = v
+                out_f.write(json.dumps(parsed_row) + "\n")
+        elif ".jsonl" in name_lower:
+            for line in f:
+                if line.strip():
+                    out_f.write(json.dumps(json.loads(line.strip())) + "\n")
+        elif ".json" in name_lower:
+            data = json.load(f)
+            if isinstance(data, list):
+                for item in data:
+                    out_f.write(json.dumps(item) + "\n")
+            else:
+                out_f.write(json.dumps(data) + "\n")
+        else:
+            # Default to treating as jsonl
+            for line in f:
+                if line.strip():
+                    out_f.write(line.strip() + "\n")
+    return output_path
 
 if data_source == "Upload custom dataset":
     uploaded_file = st.file_uploader(
@@ -80,43 +131,38 @@ if data_source == "Upload custom dataset":
         label_visibility="visible",
     )
     if uploaded_file is not None:
-        if uploaded_file.name.endswith('.gz'):
-            candidate_file_path = "uploaded_candidates.jsonl.gz"
-            with open(candidate_file_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
-        elif uploaded_file.name.endswith('.zip'):
-            candidate_file_path = "uploaded_candidates.zip"
-            with open(candidate_file_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
+        temp_path = f"temp_{uploaded_file.name}"
+        with open(temp_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
             
-            # Extract valid files from the zip
-            extracted_path = None
-            with zipfile.ZipFile(candidate_file_path, "r") as z:
+        if uploaded_file.name.endswith('.zip'):
+            with zipfile.ZipFile(temp_path, "r") as z:
                 valid_exts = ('.jsonl', '.json', '.csv', '.tsv')
                 valid_files = [name for name in z.namelist() if any(name.endswith(ext) for ext in valid_exts)]
                 if not valid_files:
                     st.error("No valid file (.jsonl, .json, .csv, .tsv) found inside the zip folder.")
                     st.stop()
                 
-                # We extract the first valid file and use it as the candidate file
-                candidate_file_path = f"uploaded_{valid_files[0]}"
-                with z.open(valid_files[0]) as zf, open(candidate_file_path, "wb") as f:
+                extracted_path = f"temp_extracted_{valid_files[0]}"
+                with z.open(valid_files[0]) as zf, open(extracted_path, "wb") as f:
                     f.write(zf.read())
+                candidate_file_path = process_and_convert_to_jsonl(extracted_path, valid_files[0])
         else:
-            # Handle .csv, .tsv, .json, .jsonl directly
-            candidate_file_path = f"uploaded_{uploaded_file.name}"
-            with open(candidate_file_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
+            candidate_file_path = process_and_convert_to_jsonl(temp_path, uploaded_file.name)
                 
-        st.caption(f"Source: `{uploaded_file.name}` ({uploaded_file.size:,} bytes)")
+        st.caption(f"Source: `{uploaded_file.name}` converted to singular accessible JSONL format.")
     else:
         st.info("Please upload a `.jsonl`, `.json`, or `.gz` file to proceed.")
         st.stop()
 else:
     candidate_file_path = SAMPLE_PATH
-    st.caption(f"Source: `{SAMPLE_PATH}` — 100 candidates from the competition dataset")
+    st.caption(f"Source: `{SAMPLE_PATH}` — first 100 candidates from the competition dataset")
 
 st.divider()
+
+if "pipeline_run_complete" not in st.session_state:
+    st.session_state.pipeline_run_complete = False
+
 run_clicked = st.button("Run Pipeline", type="primary", use_container_width=True)
 
 if run_clicked:
@@ -140,6 +186,10 @@ if run_clicked:
     if not os.path.exists("submission.csv"):
         st.error("submission.csv was not produced. Check your pipeline configuration.")
         st.stop()
+        
+    st.session_state.pipeline_run_complete = True
+
+if st.session_state.pipeline_run_complete:
 
     df = pd.read_csv("submission.csv")
     sig_df = pd.read_csv("signals.csv") if os.path.exists("signals.csv") else None
