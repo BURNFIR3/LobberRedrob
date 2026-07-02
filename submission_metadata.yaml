@@ -19,7 +19,7 @@ team_members:
     email: "huzefabhaagt1@gmail.com"
     role: "AI/ML "
   - name: "Mahi Chauhan"
-    email: ""
+    email: "mahichauhanixj@gmail.com"
     role: "AI/ML Engineer"
 
 # ============================================================================
@@ -83,5 +83,5 @@ declarations:
   read_submission_spec: true        
   code_is_original_work: true      
   no_collusion: true                
-  honeypot_check_done: false        
+  honeypot_check_done: true       
   reproduction_tested: true         # But first enter the candidates data in  a new main folder under LobberRedrob/
